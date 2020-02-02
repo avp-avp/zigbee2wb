@@ -1,0 +1,14 @@
+[Unit]
+Description=Zigbee2mqtt to WB
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/zigbee2wb -c /etc/zigbee2wb.conf
+WorkingDirectory=/mnt/data/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
