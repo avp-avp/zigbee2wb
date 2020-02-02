@@ -15,9 +15,9 @@ You need Wirenboard development env from https://github.com/contactless/wirenboa
 
 Run bould command with devenv chroot
 - export WBDEV_TARGET=wb6
-- ../devenv chroot autoreconf -fvi
-- ../devenv chroot ./configure
-- ../devenv chroot make
+- ../wbdev chroot autoreconf -fvi
+- ../wbdev chroot ./configure
+- ../wbdev chroot make
 
 ## How to run on wirenboard
 
