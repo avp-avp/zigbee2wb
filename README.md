@@ -3,6 +3,7 @@ Convert zigbee2mqtt mqtt notation to wirenboard notation
 
 ## How to build
 
+- git clone git@github.com:avp-avp/zigbee2wb.git
 - git submodule init  
 - git submodule update
 - autoreconf -fvi
