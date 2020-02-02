@@ -9,3 +9,11 @@ Convert zigbee2mqtt mqtt notation to wirenboard notation
 - ./configure
 - make
 
+## How to build for wirenboard
+
+You need Wirenboard development env from https://github.com/contactless/wirenboard 
+
+Run bould command with devenv chroot
+- ../devenv chroot autoreconf -fvi
+- ../devenv chroot ./configure
+- ../devenv chroot make
