@@ -4,7 +4,6 @@
 
   "mqtt": {
     "host": "wirenboard",
-    "host1": "192.168.1.20",
     "base_topic": "zigbee2mqtt"
   },
 
@@ -35,7 +34,7 @@
       {
         "name": "Main",
         "file_name": "/run/tasmotawb.log",
-        "console_level": 40,
+        "console_level": 4,
         "file_level": 3,
         "log_time": "yes"
       }
