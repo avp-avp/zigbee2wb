@@ -32,6 +32,7 @@ class CMqttConnection
 	CLog *m_Log;
 	bool m_isConnected, m_bStop;
 	CZigbeeWBDeviceMap m_Devices;
+	CWBDevice m_ZigbeeWb;
 	CConverters m_Converters_z2w, m_Converters_w2z;
 	CModelTemplateList m_ModelTemplates;
 
@@ -54,6 +55,7 @@ private:
 	void sendCommand(string device, string cmd, string data="");
 	void SendUpdate();
 	void CreateDevice(CZigbeeWBDevice* dev);
+	void PublishDevice(CWBDevice* dev);
 	void subscribe(const string &topic);
 	void publish(const string &topic, const string &payload, bool retain=false);
 };

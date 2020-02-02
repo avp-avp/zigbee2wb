@@ -27,11 +27,11 @@ CWBControl::ControlType getType(string name) {
 }
 
 CZigbeeWBDevice::CZigbeeWBDevice(string Name, string Description)
-	:wbDevice(Name, Description), modelTemplate(NULL){		
+	:wbDevice(Name, Description), modelTemplate(NULL) {		
 };
 
 CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
-	:m_isConnected(false), mosquittopp("Zigbee2WB"), m_bStop(false)
+	:m_isConnected(false), mosquittopp("Zigbee2WB"), m_bStop(false), m_ZigbeeWb("zigbee", "Zigbee")
 {
 	if (mqttHost!="") m_Server = mqttHost;
 	else m_Server = config.getStr("mqtt/host", false, "wirenboard");
@@ -74,6 +74,10 @@ CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
 		}
 	}
 
+	m_ZigbeeWb.addControl("state", CWBControl::Text, true);
+	m_ZigbeeWb.addControl("log_level", CWBControl::Text, true);
+	m_ZigbeeWb.addControl("permit_join", CWBControl::Text, true);
+	m_ZigbeeWb.addControl("log", CWBControl::Text, true);
 	m_Log = log;
 	connect(m_Server.c_str());
 	loop_start();
@@ -101,6 +105,7 @@ void CMqttConnection::on_connect(int rc)
 		subscribe(topic);
 	}
 
+	PublishDevice(&m_ZigbeeWb);
 	publish(m_BaseTopic+"/bridge/config/devices/get", "");
 }
 
@@ -158,8 +163,8 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							string type = device["type"].asString();
 							string model = device["model"].asString();
 							string modelID = device["modelID"].asString();
-							uint64_t lastSeen = device["lastSeen"].asUInt64();
-							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %lld", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen);
+							string lastSeen = device["lastSeen"].asString();
+							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %s", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen.c_str());
 							if (type!="Coordinator") {
 								if (m_Devices.find(friendly_name)==m_Devices.end()) {
 									CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
@@ -181,7 +186,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							}
 						}
 					} 
-				}
+				} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {
+					m_ZigbeeWb.set(v[2], payload);
+					SendUpdate();
+				} 
 			} else if (m_Devices.find(v[1])!=m_Devices.end()) {
 				if (v.size()==2) {
 					Json::Value state; Parse(payload, state);
@@ -242,7 +250,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 
 void CMqttConnection::on_log(int level, const char *str)
 {
-	m_Log->Printf(10, "mqtt::on_log(%d, %s)", level, str);
+	m_Log->Printf(max(10,level), "mqtt::on_log(%d, %s)", level, str);
 }
 
 void CMqttConnection::on_error()
@@ -253,8 +261,13 @@ void CMqttConnection::on_error()
 void CMqttConnection::CreateDevice(CZigbeeWBDevice* dev)
 {
 	m_Devices[dev->wbDevice.getName()] = dev;
+	PublishDevice(&dev->wbDevice);
+}
+
+void CMqttConnection::PublishDevice(CWBDevice* dev)
+{
 	string_map v;
-	dev->wbDevice.createDeviceValues(v);
+	dev->createDeviceValues(v);
 	for_each(string_map, v, i)
 	{
 		publish(i->first, i->second, true);
@@ -271,6 +284,8 @@ void CMqttConnection::SendUpdate()
 		if (dev->second)
 			dev->second->wbDevice.updateValues(v);
 	}
+
+	m_ZigbeeWb.updateValues(v);
 
 	for_each(string_map, v, i)
 	{
