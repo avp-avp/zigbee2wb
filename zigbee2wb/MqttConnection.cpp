@@ -152,7 +152,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 			if (v[1]=="bridge") {
 				if (v.size() >= 2 && v[2]=="config") {
 					if (v.size()==3) {
-
+						Json::Value config; Parse(payload, config);
+						m_ZigbeeWb.set("log_level", config["log_level"].asString());
+						m_ZigbeeWb.set("permit_join", config["permit_join"].asString());
+						SendUpdate();
 					} else if (v[3]=="devices" && v.size()==4) {
 						Json::Value devices; Parse(payload, devices);
 						for (Json::ArrayIndex i=0;i<devices.size();i++) {
