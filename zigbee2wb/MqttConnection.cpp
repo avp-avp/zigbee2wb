@@ -27,7 +27,7 @@ CWBControl::ControlType getType(string name) {
 }
 
 CZigbeeWBDevice::CZigbeeWBDevice(string Name, string Description)
-	:wbDevice(Name, Description){	
+	:wbDevice(Name, Description), modelTemplate(NULL){		
 };
 
 CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
@@ -159,11 +159,12 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							string model = device["model"].asString();
 							string modelID = device["modelID"].asString();
 							uint64_t lastSeen = device["lastSeen"].asUInt64();
-							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %ld", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen);
+							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %lld", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen);
 							if (type!="Coordinator") {
 								if (m_Devices.find(friendly_name)==m_Devices.end()) {
 									CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
-									if (m_ModelTemplates.find(modelID)!=m_ModelTemplates.end()) dev->modelTemplate = &m_ModelTemplates[modelID];
+									if (m_ModelTemplates.find(modelID)!=m_ModelTemplates.end()) 
+										dev->modelTemplate = &m_ModelTemplates[modelID];
 									dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
 									dev->wbDevice.set("lastSeen", lastSeen);
 									if (dev->modelTemplate) {
