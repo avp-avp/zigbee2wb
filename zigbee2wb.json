@@ -33,7 +33,7 @@
     "log": [
       {
         "name": "Main",
-        "file_name": "/run/tasmotawb.log",
+        "file_name": "zigbee2wb/run/.log",
         "console_level": 4,
         "file_level": 3,
         "log_time": "yes"
