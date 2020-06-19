@@ -15,6 +15,9 @@
   },
 
   "models": {
+    "lumi.sensor_cube.aqgl01": {
+      "json_template" : true
+    },
     "TI0001          ": {
       "controls": {
         "state_right": {
@@ -34,7 +37,7 @@
       {
         "name": "Main",
         "file_name": "/run/tasmotawb.log",
-        "console_level": 40,
+        "console_level": 4,
         "file_level": 3,
         "log_time": "yes"
       }

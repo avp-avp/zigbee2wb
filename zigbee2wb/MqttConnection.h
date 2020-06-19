@@ -12,6 +12,7 @@ struct CZigbeeControl {
 typedef map<string, CZigbeeControl> CZigbeeControlList;
 
 struct CModelTemplate {
+	bool jsonControl;
 	CZigbeeControlList controls;
 };
 
