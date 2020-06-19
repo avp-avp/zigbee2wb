@@ -56,6 +56,8 @@ CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
 	for_each_const(configValues, models, model) {
 		string name = model->first;
 		configValues controls;
+		m_ModelTemplates[name].jsonControl = model->second.getInt("json_template", false, false);
+
 		model->second.getNode("controls").getValues(controls);
 		for_each_const(configValues, controls, control) {
 			string type_name = control->second.getStr("type");
@@ -176,6 +178,9 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 									dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
 									dev->wbDevice.set("lastSeen", lastSeen);
 									if (dev->modelTemplate) {
+										if (dev->modelTemplate->jsonControl)
+											dev->wbDevice.addControl("raw", CWBControl::Text, true);
+
 										for_each_const(CZigbeeControlList, dev->modelTemplate->controls, control) {
 											dev->wbDevice.addControl(control->first, control->second.type, false);
 										}
@@ -201,6 +206,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 					const CControlMap *controls = dev->wbDevice.getControls();
 					bool needCreate = false;
 					bool gotLastSeen = false;
+
+					if (dev->modelTemplate && dev->modelTemplate->jsonControl) 
+						dev->wbDevice.set("raw", payload);
+
 					for (Json::Value::Members::iterator i=members.begin();i!=members.end();i++) {
 						string name = *i;
 						if (name=="lastSeen") gotLastSeen = true;
