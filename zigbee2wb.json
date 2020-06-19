@@ -34,7 +34,7 @@
       {
         "name": "Main",
         "file_name": "/run/tasmotawb.log",
-        "console_level": 4,
+        "console_level": 40,
         "file_level": 3,
         "log_time": "yes"
       }
