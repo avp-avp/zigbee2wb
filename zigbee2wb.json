@@ -3,7 +3,7 @@
   },
 
   "mqtt": {
-    "host": "wirenboard",
+    "host": "192.168.178.21",
     "base_topic": "zigbee2mqtt"
   },
 
@@ -16,6 +16,12 @@
 
   "models": {
     "lumi.sensor_cube.aqgl01": {
+      "json_template" : true
+    },
+      "lumi.sensor_motion": {
+        "json_template" : true
+    },
+    "lumi.sensor_switch": {
       "json_template" : true
     },
     "TI0001          ": {
