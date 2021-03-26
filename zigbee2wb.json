@@ -29,6 +29,18 @@
           "converter": "on_off" 
         }
       }
+    },
+    "TS110F": {
+      "controls": {
+        "state": {
+          "type": "Switch",
+          "converter": "on_off" 
+        }, 
+        "brightness": {
+          "type": "Range",
+          "max": 255
+        }
+      }
     }
   },
 
@@ -37,7 +49,7 @@
       {
         "name": "Main",
         "file_name": "zigbee2wb/run/.log",
-        "console_level": 4,
+        "console_level": 40,
         "file_level": 3,
         "log_time": "yes"
       }

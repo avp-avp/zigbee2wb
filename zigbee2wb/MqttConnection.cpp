@@ -63,6 +63,8 @@ CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
 			string type_name = control->second.getStr("type");
 			string converter = control->second.getStr("converter", false, "");
 			m_ModelTemplates[name].controls[control->first].type = getType(type_name);
+			m_ModelTemplates[name].controls[control->first].max = control->second.getInt("max", false, -1);
+
 			if (m_ModelTemplates[name].controls[control->first].type == CWBControl::Error) 
 				throw CHaException(CHaException::ErrBadParam, "Unknown type: %s", type_name.c_str());
 			
@@ -183,6 +185,13 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 
 										for_each_const(CZigbeeControlList, dev->modelTemplate->controls, control) {
 											dev->wbDevice.addControl(control->first, control->second.type, false);
+											CZigbeeControl *control_template = NULL;
+											if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
+												control_template = &dev->modelTemplate->controls[control->first];
+											}
+								
+											if (control_template && control_template->max>0) 
+												dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
 										}
 									}
 									CreateDevice(dev);
@@ -214,16 +223,23 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 						string name = *i;
 						if (name=="lastSeen") gotLastSeen = true;
 						string value = state[name].asString();
-						if (controls->find(*i)==controls->end()) {
-							dev->wbDevice.addControl(*i, CWBControl::Text, false);
-							needCreate = true;
-						}
+
+						CZigbeeControl *control_template = NULL;
 						if (dev->modelTemplate) {
 							if (dev->modelTemplate->controls.find(name)!=dev->modelTemplate->controls.end()) {
-								CZigbeeControl &control = dev->modelTemplate->controls[*i];
-								if (control.converter_z2w->find(value)!=control.converter_z2w->end()) 
-									value = (*control.converter_z2w)[value];
+								control_template = &dev->modelTemplate->controls[*i];
 							}
+						} 			
+
+						if (controls->find(*i)==controls->end()) {
+							dev->wbDevice.addControl(*i, CWBControl::Text, false);
+							if (control_template && control_template->max>0) 
+								dev->wbDevice.enrichControl(*i, "max", itoa(control_template->max));
+							needCreate = true;
+						}
+						if (control_template) {
+							if (control_template->converter_z2w && control_template->converter_z2w->find(value)!=control_template->converter_z2w->end()) 
+								value = (*control_template->converter_z2w)[value];
 						} 				
 						dev->wbDevice.set(*i, value);
 					}

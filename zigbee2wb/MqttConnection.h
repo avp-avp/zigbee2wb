@@ -6,6 +6,7 @@ typedef map<string, string_map> CConverters;
 
 struct CZigbeeControl {
 	CWBControl::ControlType type;
+	int max;
 	string_map *converter_z2w, *converter_w2z;
 };
 
