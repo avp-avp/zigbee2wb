@@ -18,6 +18,12 @@
     "lumi.sensor_cube.aqgl01": {
       "json_template" : true
     },
+      "MiJia human body movement sensor (RTCGQ01LM)": {
+        "json_template" : true
+    },
+    "MiJia wireless switch (WXKG01LM)": {
+      "json_template" : true
+    },
     "TI0001          ": {
       "controls": {
         "state_right": {
