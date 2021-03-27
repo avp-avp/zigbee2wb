@@ -3,7 +3,7 @@
   },
 
   "mqtt": {
-    "host": "192.168.178.21",
+    "host": "localhost",
     "base_topic": "zigbee2mqtt"
   },
 
