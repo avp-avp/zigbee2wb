@@ -160,7 +160,9 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 						m_ZigbeeWb.set("log_level", config["log_level"].asString());
 						m_ZigbeeWb.set("permit_join", config["permit_join"].asString());
 						SendUpdate();
-					} else if (v[3]=="devices" && v.size()==4) {
+					} 
+				} else if ((v.size()==3 && v[2]=="devices") || 
+						   (v.size()==4 && v[2]=="config" && v[3]=="devices")) {
 						Json::Value devices; Parse(payload, devices);
 						for (Json::ArrayIndex i=0;i<devices.size();i++) {
 							Json::Value device = devices[i];
@@ -202,8 +204,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 								publish(m_BaseTopic+"/"+friendly_name+"/get", "");
 							}
 						}
-					} 
-				} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {
+					} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {
 					m_ZigbeeWb.set(v[2], payload);
 					SendUpdate();
 				} 
