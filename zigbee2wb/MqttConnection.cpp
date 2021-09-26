@@ -194,6 +194,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 								
 											if (control_template && control_template->max>0) 
 												dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
+
+											char request[256];
+											snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first);
+											publish(m_BaseTopic+"/"+friendly_name+"/get", request);
 										}
 									}
 									CreateDevice(dev);
@@ -201,7 +205,6 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 									m_Log->Printf(5, "subscribe to %s", topic.c_str());
 									subscribe(topic);
 								}
-								publish(m_BaseTopic+"/"+friendly_name+"/get", "");
 							}
 						}
 					} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {
