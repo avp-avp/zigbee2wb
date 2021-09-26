@@ -171,7 +171,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							string friendly_name = device["friendly_name"].asString();                        
 							string type = device["type"].asString();
 							string model = device["model"].asString();
-							string modelID = device["modelID"].asString();
+							string modelID = device["modelID"].asString(); if (modelID.length()==0) modelID = device["model_id"].asString();
 							string lastSeen = device["lastSeen"].asString();
 							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %s", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen.c_str());
 							if (type!="Coordinator") {
