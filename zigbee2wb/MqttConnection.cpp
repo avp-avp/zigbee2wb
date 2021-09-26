@@ -196,7 +196,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 												dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
 
 											char request[256];
-											snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first);
+											snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first.c_str());
 											publish(m_BaseTopic+"/"+friendly_name+"/get", request);
 										}
 									}
