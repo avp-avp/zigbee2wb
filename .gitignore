@@ -1,8 +1,10 @@
 *.m4
+*.o
 ar-lib
 compile
 config.*
 configure
+configure~
 depcomp
 haconfig.*
 install-sh
@@ -12,3 +14,6 @@ autom4te.cache
 missing
 stamp-h1
 zigbee2wb/zigbee2wb
+Makefile
+Makefile.in
+.deps
