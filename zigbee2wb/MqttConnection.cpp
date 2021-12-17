@@ -228,7 +228,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 					for (Json::Value::Members::iterator i=members.begin();i!=members.end();i++) {
 						string name = *i;
 						if (name=="lastSeen") gotLastSeen = true;
-						if (!state[name].isString()) continue;
+						if (!state[name].isConvertibleTo(Json::stringValue)) continue;
 						string value = state[name].asString();
 
 						CZigbeeControl *control_template = NULL;
