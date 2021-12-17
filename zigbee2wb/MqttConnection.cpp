@@ -1,6 +1,7 @@
 #include "zigbee2wb.h"
 #include "MqttConnection.h"
 
+/*
 CWBControl::ControlType getType(string name) {
 	if (name == "Switch") return CWBControl::Switch;
 	else if (name == "Alarm") return CWBControl::Alarm;
@@ -25,6 +26,7 @@ CWBControl::ControlType getType(string name) {
 	else if (name == "Lux") return CWBControl::Lux;
 	return CWBControl::Error;
 }
+*/
 
 CZigbeeWBDevice::CZigbeeWBDevice(string Name, string Description)
 	:wbDevice(Name, Description), modelTemplate(NULL) {		
@@ -62,7 +64,7 @@ CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
 		for_each_const(configValues, controls, control) {
 			string type_name = control->second.getStr("type");
 			string converter = control->second.getStr("converter", false, "");
-			m_ModelTemplates[name].controls[control->first].type = getType(type_name);
+			m_ModelTemplates[name].controls[control->first].type = CWBControl::getType(type_name);
 			m_ModelTemplates[name].controls[control->first].max = control->second.getInt("max", false, -1);
 
 			if (m_ModelTemplates[name].controls[control->first].type == CWBControl::Error) 
@@ -226,6 +228,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 					for (Json::Value::Members::iterator i=members.begin();i!=members.end();i++) {
 						string name = *i;
 						if (name=="lastSeen") gotLastSeen = true;
+						if (!state[name].isString()) continue;
 						string value = state[name].asString();
 
 						CZigbeeControl *control_template = NULL;

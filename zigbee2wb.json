@@ -27,11 +27,11 @@
     "TI0001          ": {
       "controls": {
         "state_right": {
-          "type": "Switch",
+          "type": "switch",
           "converter": "on_off" 
         },
         "state_left": {
-          "type": "Switch",
+          "type": "switch",
           "converter": "on_off" 
         }
       }
@@ -39,22 +39,34 @@
     "TS110F": {
       "controls": {
         "state": {
-          "type": "Switch",
+          "type": "switch",
           "converter": "on_off" 
         }, 
         "brightness": {
-          "type": "Range",
+          "type": "range",
           "max": 255
+        }
+      }
+    },
+    "lumi.weather": {
+      "controls": {
+        "temperature": {
+          "type": "temperature"
+        },
+        "humidity": {
+          "type": "rel_humidity"
+        },
+        "pressure": {
+          "type": "value"
         }
       }
     }
   },
-
   "debug": {
     "log": [
       {
         "name": "Main",
-        "file_name": "zigbee2wb/run/.log",
+        "file_name": "/run/zigbee2wb.log",
         "console_level": 40,
         "file_level": 3,
         "log_time": "yes"

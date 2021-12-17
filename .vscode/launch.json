@@ -8,7 +8,7 @@
         "type": "lldb",
         "request": "launch",
         "program": "${workspaceFolder}/zigbee2wb/zigbee2wb",
-        "args": ["-mwirenboard"]
+        "args": ["-m192.168.1.20"]
       }
     ]
   }
