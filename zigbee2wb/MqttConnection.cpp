@@ -1,32 +1,34 @@
 #include "zigbee2wb.h"
 #include "MqttConnection.h"
 
-/*
-CWBControl::ControlType getType(string name) {
-	if (name == "Switch") return CWBControl::Switch;
-	else if (name == "Alarm") return CWBControl::Alarm;
-	else if (name == "PushButton") return CWBControl::PushButton;
-	else if (name == "Range") return CWBControl::Range;
-	else if (name == "Rgb") return CWBControl::Rgb;
-	else if (name == "Text") return CWBControl::Text;
-	else if (name == "Generic") return CWBControl::Generic;
-	else if (name == "Temperature") return CWBControl::Temperature;
-	else if (name == "RelativeHumidity") return CWBControl::RelativeHumidity;
-	else if (name == "AtmosphericPressure") return CWBControl::AtmosphericPressure;
-	else if (name == "SoundLevel") return CWBControl::SoundLevel;
-	else if (name == "PrecipitationRate") return CWBControl::PrecipitationRate;
-	else if (name == "WindSpeed") return CWBControl::WindSpeed;
-	else if (name == "PowerPower") return CWBControl::PowerPower;
-	else if (name == "PowerConsumption") return CWBControl::PowerConsumption;
-	else if (name == "VoltageVoltage") return CWBControl::VoltageVoltage;
-	else if (name == "WaterFlow") return CWBControl::WaterFlow;
-	else if (name == "WaterTotal") return CWBControl::WaterTotal;
-	else if (name == "Resistance") return CWBControl::Resistance;
-	else if (name == "GasConcentration") return CWBControl::GasConcentration;
-	else if (name == "Lux") return CWBControl::Lux;
-	return CWBControl::Error;
+CWBControl::ControlType getWBType(string name) {
+	if (name == "temperature")      return CWBControl::Temperature;
+	else if (name == "humidity")    return CWBControl::RelativeHumidity;
+	else if (name == "voltage")     return CWBControl::Voltage;
+	else if (name == "linkquality") return CWBControl::Generic;
+	else if (name == "battery")     return CWBControl::Generic;
+	else if (name == "pressure")    return CWBControl::AtmosphericPressure;
+
+	return CWBControl::Text;
 }
-*/
+
+string hPa_Converter(string value)
+{
+	return ftoa(atof(value)/1.33322387415, 1);
+}
+
+string mV_Converter(string value)
+{
+	return ftoa(0.001*atoi(value), 3);
+}
+
+ConverterFunc getConverter(string unit) {
+	if (unit == "hPa")      return hPa_Converter;
+	if (unit == "mV")       return mV_Converter;
+	
+	return NULL;
+}
+
 
 CZigbeeWBDevice::CZigbeeWBDevice(string Name, string Description)
 	:wbDevice(Name, Description), modelTemplate(NULL) {		
@@ -156,59 +158,104 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 
 		if (v[0]=="zigbee2mqtt") {
 			if (v[1]=="bridge") {
-				if (v.size() >= 2 && v[2]=="config") {
+				if (v.size() == 3 && v[2]=="state") {
+					if (payload=="online") {
+						publish(m_BaseTopic+"/bridge/config/devices/get", "");
+					}
+				}
+				else if (v.size() >= 3 && v[2]=="config") {
 					if (v.size()==3) {
 						Json::Value config; Parse(payload, config);
 						m_ZigbeeWb.set("log_level", config["log_level"].asString());
 						m_ZigbeeWb.set("permit_join", config["permit_join"].asString());
 						SendUpdate();
 					} 
-				} else if ((v.size()==3 && v[2]=="devices") || 
-						   (v.size()==4 && v[2]=="config" && v[3]=="devices")) {
-						Json::Value devices; Parse(payload, devices);
-						for (Json::ArrayIndex i=0;i<devices.size();i++) {
-							Json::Value device = devices[i];
-							string ieeeAddr = device["ieeeAddr"].asString();
-							if (!device.isMember("friendly_name")) continue;
-							string friendly_name = device["friendly_name"].asString();                        
-							string type = device["type"].asString();
-							string model = device["model"].asString();
-							string modelID = device["modelID"].asString(); if (modelID.length()==0) modelID = device["model_id"].asString();
-							string lastSeen = device["lastSeen"].asString();
-							m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %s", friendly_name.c_str(), type.c_str(), model.c_str(), modelID.c_str(), lastSeen.c_str());
-							if (type!="Coordinator") {
-								if (m_Devices.find(friendly_name)==m_Devices.end()) {
-									CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
-									if (m_ModelTemplates.find(modelID)!=m_ModelTemplates.end()) 
-										dev->modelTemplate = &m_ModelTemplates[modelID];
-									dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
-									dev->wbDevice.set("lastSeen", lastSeen);
-									if (dev->modelTemplate) {
-										if (dev->modelTemplate->jsonControl)
-											dev->wbDevice.addControl("raw", CWBControl::Text, true);
+				} 
+				else if (v.size()==3 && v[2]=="devices") 
+				{
+					Json::Value devices; Parse(payload, devices);
+					for (Json::Value::iterator iDev=devices.begin();iDev!=devices.end();iDev++) {
+						Json::Value device = *iDev;
+						string type = device["type"].asString();
+						bool interview_completed = device["interview_completed"].asBool();
+						if (type=="Coordinator" || !device.isMember("friendly_name") || !interview_completed) continue;
 
-										for_each_const(CZigbeeControlList, dev->modelTemplate->controls, control) {
-											dev->wbDevice.addControl(control->first, control->second.type, false);
-											CZigbeeControl *control_template = NULL;
-											if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
-												control_template = &dev->modelTemplate->controls[control->first];
-											}
-								
-											if (control_template && control_template->max>0) 
-												dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
+						string ieee_address = device["ieee_address"].asString();
+						string friendly_name = device["friendly_name"].asString();   
+						Json::Value definition = device["definition"];     
+						string model = definition["model"].asString();
+						string model_id = device["model_id"].asString(); 
+						string lastSeen = device["lastSeen"].asString();
+						m_Log->Printf(5, "Device %s(%s, '%s'/'%s') lastSeen %s", friendly_name.c_str(), type.c_str(), model.c_str(), model_id.c_str(), lastSeen.c_str());
 
-											char request[256];
-											snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first.c_str());
-											publish(m_BaseTopic+"/"+friendly_name+"/get", request);
-										}
+						if (m_Devices.find(friendly_name)==m_Devices.end()) {
+							CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
+							CModelTemplateList::iterator iModelTemplate = m_ModelTemplates.find(model_id);
+							if (iModelTemplate!=m_ModelTemplates.end()) {
+								dev->modelTemplate = &iModelTemplate->second;
+								if (dev->modelTemplate->jsonControl)
+									dev->wbDevice.addControl("raw", CWBControl::Text, true);
+							}
+							dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
+							dev->wbDevice.set("lastSeen", lastSeen);
+
+							Json::Value exposes = definition["exposes"];
+							for (Json::Value::iterator iExpose=exposes.begin();iExpose!=exposes.end();iExpose++) {
+								dev->exposes[(*iExpose)["name"].asString()] = *iExpose;
+							}
+							/*
+								Json::Value expose = *iExpose;
+								int access = expose["access"].asInt();
+								string type = expose["type"].asString();
+								string name = expose["name"].asString();
+								string unit = expose["unit"].asString();
+								string property = expose["property"].asString();
+								CWBControl::ControlType wbType = getWBType(property);
+
+								if (!(access&1)) continue;
+								bool readOnly = access&2;
+/ *
+								if (dev->modelTemplate) {
+									if(dev->modelTemplate->controls.find(name)!=dev->modelTemplate->controls.end()) {
+									CZigbeeControl *control_template = NULL;
+									if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
+										control_template = &dev->modelTemplate->controls[control->first];
 									}
-									CreateDevice(dev);
-									string topic = "/devices/"+friendly_name+"/controls/+/on";
-									m_Log->Printf(5, "subscribe to %s", topic.c_str());
-									subscribe(topic);
+						
+									if (control_template && control_template->max>0) 
+										dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
+										
+									}
+								}* /
+								dev->wbDevice.addControl(name, wbType, readOnly);								
+							}
+							/ *
+							if (dev->modelTemplate) {
+								if (dev->modelTemplate->jsonControl)
+									dev->wbDevice.addControl("raw", CWBControl::Text, true);
+
+								for_each_const(CZigbeeControlList, dev->modelTemplate->controls, control) {
+									dev->wbDevice.addControl(control->first, control->second.type, false);
+									CZigbeeControl *control_template = NULL;
+									if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
+										control_template = &dev->modelTemplate->controls[control->first];
+									}
+						
+									if (control_template && control_template->max>0) 
+										dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
+
+									char request[256];
+									snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first.c_str());
+									//publish(m_BaseTopic+"/"+friendly_name+"/get", request);
 								}
 							}
+							*/
+							CreateDevice(dev);
+							string topic = "/devices/"+friendly_name+"/controls/+/on";
+							m_Log->Printf(5, "subscribe to %s", topic.c_str());
+							subscribe(topic);
 						}
+					}
 					} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {
 					m_ZigbeeWb.set(v[2], payload);
 					SendUpdate();
@@ -239,16 +286,37 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 						} 			
 
 						if (controls->find(*i)==controls->end()) {
-							dev->wbDevice.addControl(*i, CWBControl::Text, false);
+							if (dev->exposes.find(name)==dev->exposes.end()) continue;
+							Json::Value expose = dev->exposes[name];
+							int access = expose["access"].asInt();
+							string type = expose["type"].asString();
+							string name = expose["name"].asString();
+							string unit = expose["unit"].asString();
+							string property = expose["property"].asString();
+							int value_max = expose["value_max"].asInt();
+							CWBControl::ControlType wbType = getWBType(property);
+							ConverterFunc converter = getConverter(unit);
+							if (converter) {
+								dev->converters[name] = converter;
+							}
+
+
+							dev->wbDevice.addControl(*i, wbType, access&2?true:false);
 							if (control_template && control_template->max>0) 
 								dev->wbDevice.enrichControl(*i, "max", itoa(control_template->max));
+							else if (value_max)
+								dev->wbDevice.enrichControl(*i, "max", itoa(value_max));
+
 							needCreate = true;
+							m_Log->Printf(5, " Control %s(%s, '%s(%d)'/'%s') access %d", name.c_str(), type.c_str(), property.c_str(), wbType, unit.c_str(), access);
 						}
-						if (control_template) {
-							if (control_template->converter_z2w && control_template->converter_z2w->find(value)!=control_template->converter_z2w->end()) 
-								value = (*control_template->converter_z2w)[value];
-						} 				
-						dev->wbDevice.set(*i, value);
+						if (control_template && control_template->converter_z2w && control_template->converter_z2w->find(value)!=control_template->converter_z2w->end()) {
+							value = (*control_template->converter_z2w)[value];
+						} 		
+						else if (dev->converters.find(name)!=dev->converters.end()) {
+							value = dev->converters[name](value);
+						}
+						dev->wbDevice.set(name, value);
 					}
 
 					if (!gotLastSeen) {

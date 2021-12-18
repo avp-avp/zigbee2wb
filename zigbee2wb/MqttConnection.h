@@ -3,6 +3,8 @@
 #include "mosquittopp.h"
 
 typedef map<string, string_map> CConverters;
+typedef string (*ConverterFunc)(string);
+typedef map<string, ConverterFunc> CConverterFuncs;
 
 struct CZigbeeControl {
 	CWBControl::ControlType type;
@@ -11,6 +13,7 @@ struct CZigbeeControl {
 };
 
 typedef map<string, CZigbeeControl> CZigbeeControlList;
+typedef map<string, Json::Value> CJsonMap;
 
 struct CModelTemplate {
 	bool jsonControl;
@@ -23,6 +26,8 @@ struct CZigbeeWBDevice {
 	CZigbeeWBDevice(string Name, string Description);
 	CModelTemplate *modelTemplate;
 	CWBDevice wbDevice;
+	CJsonMap exposes;
+	CConverterFuncs converters;
 };
 
 typedef map<string, CZigbeeWBDevice*> CZigbeeWBDeviceMap;
