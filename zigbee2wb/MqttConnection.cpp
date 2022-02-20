@@ -10,6 +10,9 @@ CWBControl::ControlType getWBType(string name) {
 	else if (name == "pressure")    return CWBControl::AtmosphericPressure;
 	else if (name == "state_right") return CWBControl::Switch;
 	else if (name == "state_left")  return CWBControl::Switch;
+	else if (name == "occupancy")   return CWBControl::Switch;
+	else if (name == "contact")     return CWBControl::Switch;
+
 
 	return CWBControl::Text;
 }
