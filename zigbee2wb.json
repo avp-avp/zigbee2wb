@@ -18,12 +18,6 @@
     "lumi.sensor_cube.aqgl01": {
       "json_template" : true
     },
-      "lumi.sensor_motion": {
-        "json_template" : true
-    },
-    "lumi.sensor_switch": {
-      "json_template" : true
-    },
     "TI0001          ": {
       "controls": {
         "state_right": {
@@ -45,19 +39,6 @@
         "brightness": {
           "type": "range",
           "max": 255
-        }
-      }
-    },
-    "lumi.weather": {
-      "controls": {
-        "temperature": {
-          "type": "temperature"
-        },
-        "humidity": {
-          "type": "rel_humidity"
-        },
-        "pressure": {
-          "type": "value"
         }
       }
     }
