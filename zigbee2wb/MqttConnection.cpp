@@ -8,6 +8,8 @@ CWBControl::ControlType getWBType(string name) {
 	else if (name == "linkquality") return CWBControl::Generic;
 	else if (name == "battery")     return CWBControl::Generic;
 	else if (name == "pressure")    return CWBControl::AtmosphericPressure;
+	else if (name == "state_right") return CWBControl::Switch;
+	else if (name == "state_left")  return CWBControl::Switch;
 
 	return CWBControl::Text;
 }
@@ -201,55 +203,28 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 
 							Json::Value exposes = definition["exposes"];
 							for (Json::Value::iterator iExpose=exposes.begin();iExpose!=exposes.end();iExpose++) {
-								dev->exposes[(*iExpose)["name"].asString()] = *iExpose;
-							}
-							/*
-								Json::Value expose = *iExpose;
-								int access = expose["access"].asInt();
-								string type = expose["type"].asString();
-								string name = expose["name"].asString();
-								string unit = expose["unit"].asString();
-								string property = expose["property"].asString();
-								CWBControl::ControlType wbType = getWBType(property);
-
-								if (!(access&1)) continue;
-								bool readOnly = access&2;
-/ *
-								if (dev->modelTemplate) {
-									if(dev->modelTemplate->controls.find(name)!=dev->modelTemplate->controls.end()) {
-									CZigbeeControl *control_template = NULL;
-									if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
-										control_template = &dev->modelTemplate->controls[control->first];
+								string name = (*iExpose)["property"].asString();
+								if (name.length()){
+									dev->exposes[name] = *iExpose;
+								} else {
+									if (!(*iExpose)["features"].isArray()) {
+										m_Log->Printf(1, "Device %s has bad expose(property and features not found)");
+										continue;
 									}
-						
-									if (control_template && control_template->max>0) 
-										dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
-										
+									if ((*iExpose)["features"].size()!=1) {
+										m_Log->Printf(1, "Device %s features size != 1");
+										continue;
 									}
-								}* /
-								dev->wbDevice.addControl(name, wbType, readOnly);								
-							}
-							/ *
-							if (dev->modelTemplate) {
-								if (dev->modelTemplate->jsonControl)
-									dev->wbDevice.addControl("raw", CWBControl::Text, true);
-
-								for_each_const(CZigbeeControlList, dev->modelTemplate->controls, control) {
-									dev->wbDevice.addControl(control->first, control->second.type, false);
-									CZigbeeControl *control_template = NULL;
-									if (dev->modelTemplate->controls.find(control->first)!=dev->modelTemplate->controls.end()) {
-										control_template = &dev->modelTemplate->controls[control->first];
+									name = (*iExpose)["features"][0]["property"].asString();
+									if (!name.length()){
+										m_Log->Printf(1, "Device %s expose name not found");
+										continue;
 									}
-						
-									if (control_template && control_template->max>0) 
-										dev->wbDevice.enrichControl(control->first, "max", itoa(control_template->max));
-
-									char request[256];
-									snprintf(request, sizeof(request), "{\"%s\":\"\"}", control->first.c_str());
-									//publish(m_BaseTopic+"/"+friendly_name+"/get", request);
+									dev->exposes[name] = (*iExpose)["features"][0];
 								}
+								m_Log->Printf(6, "Device %s add expose %s", friendly_name.c_str(), name.c_str());
 							}
-							*/
+							
 							CreateDevice(dev);
 							string topic = "/devices/"+friendly_name+"/controls/+/on";
 							m_Log->Printf(5, "subscribe to %s", topic.c_str());
@@ -281,16 +256,20 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 						CZigbeeControl *control_template = NULL;
 						if (dev->modelTemplate) {
 							if (dev->modelTemplate->controls.find(name)!=dev->modelTemplate->controls.end()) {
-								control_template = &dev->modelTemplate->controls[*i];
+								control_template = &dev->modelTemplate->controls[name];
 							}
 						} 			
 
-						if (controls->find(*i)==controls->end()) {
+						if (controls->find(name)==controls->end()) {
+							m_Log->Printf(5, " Control %s  not found", name.c_str());
 							if (dev->exposes.find(name)==dev->exposes.end()) continue;
 							Json::Value expose = dev->exposes[name];
 							int access = expose["access"].asInt();
 							string type = expose["type"].asString();
-							string name = expose["name"].asString();
+							string expose_name = expose["name"].asString();
+							if (name!=expose_name) {
+								m_Log->Printf(6, " Control %s!=%s", name.c_str(), expose_name.c_str());
+							}
 							string unit = expose["unit"].asString();
 							string property = expose["property"].asString();
 							int value_max = expose["value_max"].asInt();
@@ -300,8 +279,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 								dev->converters[name] = converter;
 							}
 
-
-							dev->wbDevice.addControl(*i, wbType, access&2?true:false);
+							dev->wbDevice.addControl(*i, wbType, access&2?false:true);
 							if (control_template && control_template->max>0) 
 								dev->wbDevice.enrichControl(*i, "max", itoa(control_template->max));
 							else if (value_max)
