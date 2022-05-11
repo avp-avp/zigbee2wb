@@ -203,12 +203,14 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							}
 							dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
 							dev->wbDevice.set("lastSeen", lastSeen);
+							string gettableControl = "linkquality"; 
 
 							Json::Value exposes = definition["exposes"];
 							for (Json::Value::iterator iExpose=exposes.begin();iExpose!=exposes.end();iExpose++) {
 								string name = (*iExpose)["property"].asString();
+								Json::Value expose;
 								if (name.length()){
-									dev->exposes[name] = *iExpose;
+									expose = *iExpose;
 								} else {
 									if (!(*iExpose)["features"].isArray()) {
 										m_Log->Printf(1, "Device %s has bad expose(property and features not found)");
@@ -223,8 +225,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 										m_Log->Printf(1, "Device %s expose name not found");
 										continue;
 									}
-									dev->exposes[name] = (*iExpose)["features"][0];
+									expose = (*iExpose)["features"][0];
 								}
+								dev->exposes[name] = expose;
+								if (expose["access"].asInt()&4) gettableControl = expose["property"].asString();
 								m_Log->Printf(6, "Device %s add expose %s", friendly_name.c_str(), name.c_str());
 							}
 							
@@ -232,6 +236,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							string topic = "/devices/"+friendly_name+"/controls/+/on";
 							m_Log->Printf(5, "subscribe to %s", topic.c_str());
 							subscribe(topic);
+							// publish(m_BaseTopic+"/"+friendly_name+"/get", "{\""+gettableControl+"\": \"\"}");
 						}
 					}
 					} else if (v.size() == 3 && m_ZigbeeWb.controlExists(v[2])) {

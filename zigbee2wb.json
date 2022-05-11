@@ -11,17 +11,23 @@
     "on_off": {
       "ON": "1",
       "OFF": "0"
+      },
+      "binary": {
+        "true": "1",
+        "false": "0"
       }
   },
 
   "models": {
+    "lumi.sensor_magnet.aq2": {
+      "controls": {
+        "contact": {
+          "type": "switch",
+          "converter": "binary" 
+        }
+      }
+    },
     "lumi.sensor_cube.aqgl01": {
-      "json_template" : true
-    },
-      "lumi.sensor_motion": {
-        "json_template" : true
-    },
-    "lumi.sensor_switch": {
       "json_template" : true
     },
     "TI0001          ": {
@@ -45,19 +51,6 @@
         "brightness": {
           "type": "range",
           "max": 255
-        }
-      }
-    },
-    "lumi.weather": {
-      "controls": {
-        "temperature": {
-          "type": "temperature"
-        },
-        "humidity": {
-          "type": "rel_humidity"
-        },
-        "pressure": {
-          "type": "value"
         }
       }
     }
