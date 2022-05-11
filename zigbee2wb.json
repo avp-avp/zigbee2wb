@@ -11,10 +11,22 @@
     "on_off": {
       "ON": "1",
       "OFF": "0"
+      },
+      "binary": {
+        "true": "1",
+        "false": "0"
       }
   },
 
   "models": {
+    "lumi.sensor_magnet.aq2": {
+      "controls": {
+        "contact": {
+          "type": "switch",
+          "converter": "binary" 
+        }
+      }
+    },
     "lumi.sensor_cube.aqgl01": {
       "json_template" : true
     },
