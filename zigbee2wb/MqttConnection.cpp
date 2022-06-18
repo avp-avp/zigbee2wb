@@ -12,6 +12,7 @@ CWBControl::ControlType getWBType(string name) {
 	else if (name == "state_left")  return CWBControl::Switch;
 	else if (name == "occupancy")   return CWBControl::Switch;
 	else if (name == "contact")     return CWBControl::Switch;
+	else if (name == "state")       return CWBControl::Switch;
 
 
 	return CWBControl::Text;
@@ -196,11 +197,6 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 						if (m_Devices.find(friendly_name)==m_Devices.end()) {
 							CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
 							CModelTemplateList::iterator iModelTemplate = m_ModelTemplates.find(model_id);
-							if (iModelTemplate!=m_ModelTemplates.end()) {
-								dev->modelTemplate = &iModelTemplate->second;
-								if (dev->modelTemplate->jsonControl)
-									dev->wbDevice.addControl("raw", CWBControl::Text, true);
-							}
 							dev->wbDevice.addControl("lastSeen", CWBControl::Text, true);
 							dev->wbDevice.set("lastSeen", lastSeen);
 							string gettableControl = "linkquality"; 
@@ -208,6 +204,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							Json::Value exposes = definition["exposes"];
 							for (Json::Value::iterator iExpose=exposes.begin();iExpose!=exposes.end();iExpose++) {
 								string name = (*iExpose)["property"].asString();
+								string type = (*iExpose)["type"].asString();
 								Json::Value expose;
 								if (name.length()){
 									expose = *iExpose;
@@ -228,10 +225,33 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 									expose = (*iExpose)["features"][0];
 								}
 								dev->exposes[name] = expose;
+
+								if ((type=="switch" || type=="binary") && iModelTemplate==m_ModelTemplates.end()) {
+									string on  = expose["value_on" ].asString();
+									string off = expose["value_off"].asString();
+									if (on!="" && off!="") {
+										string dev = friendly_name+"/"+name;
+										m_Converters_w2z[dev]["1"] = on;
+										m_Converters_z2w[dev][on] = "1";
+										m_Converters_w2z[dev]["0"] = off;
+										m_Converters_z2w[dev][off] = "0";
+										m_ModelTemplates["#"+friendly_name].controls[name].type = CWBControl::Switch;
+										m_ModelTemplates["#"+friendly_name].controls[name].converter_z2w = &m_Converters_z2w[dev];
+										m_ModelTemplates["#"+friendly_name].controls[name].converter_w2z = &m_Converters_w2z[dev];					
+										iModelTemplate = m_ModelTemplates.find("#"+friendly_name);
+									}
+								}
+
 								if (expose["access"].asInt()&4) gettableControl = expose["property"].asString();
-								m_Log->Printf(6, "Device %s add expose %s", friendly_name.c_str(), name.c_str());
+								m_Log->Printf(6, "Device %s add expose %s type %s", friendly_name.c_str(), name.c_str(), type.c_str());
 							}
 							
+							if (iModelTemplate!=m_ModelTemplates.end()) {
+								dev->modelTemplate = &iModelTemplate->second;
+								if (dev->modelTemplate->jsonControl)
+									dev->wbDevice.addControl("raw", CWBControl::Text, true);
+							}
+
 							CreateDevice(dev);
 							string topic = "/devices/"+friendly_name+"/controls/+/on";
 							m_Log->Printf(5, "subscribe to %s", topic.c_str());
@@ -244,7 +264,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 					SendUpdate();
 				} 
 			} else if (m_Devices.find(v[1])!=m_Devices.end()) {
-				if (v.size()==2) {
+				if (v.size()==2 && message->payloadlen) {
 					Json::Value state; Parse(payload, state);
 					CZigbeeWBDevice *dev = m_Devices[v[1]];
 					Json::Value::Members members = state.getMemberNames();
@@ -281,7 +301,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 							string unit = expose["unit"].asString();
 							string property = expose["property"].asString();
 							int value_max = expose["value_max"].asInt();
-							CWBControl::ControlType wbType = getWBType(property);
+							CWBControl::ControlType wbType = control_template ? control_template->type : getWBType(property);
 							ConverterFunc converter = getConverter(unit);
 							if (converter) {
 								dev->converters[name] = converter;

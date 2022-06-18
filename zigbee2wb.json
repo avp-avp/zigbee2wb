@@ -19,7 +19,7 @@
   },
 
   "models": {
-    "lumi.sensor_magnet.aq2": {
+    "-lumi.sensor_magnet.aq2": {
       "controls": {
         "contact": {
           "type": "switch",
@@ -30,7 +30,7 @@
     "lumi.sensor_cube.aqgl01": {
       "json_template" : true
     },
-    "TI0001          ": {
+    "-TI0001          ": {
       "controls": {
         "state_right": {
           "type": "switch",
@@ -44,7 +44,7 @@
     },
     "TS110F": {
       "controls": {
-        "state": {
+        "-state": {
           "type": "switch",
           "converter": "on_off" 
         }, 
@@ -53,6 +53,12 @@
           "max": 255
         }
       }
+    }, 
+    "-SWITCH-ZR02\u0000\u0000": {
+      "state": {
+        "type": "switch",
+        "converter": "on_off" 
+      } 
     }
   },
   "debug": {

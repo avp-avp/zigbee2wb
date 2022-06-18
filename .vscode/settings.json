@@ -70,6 +70,8 @@
         "strstream": "cpp",
         "system_error": "cpp",
         "unordered_map": "cpp",
-        "__functional_base_03": "cpp"
+        "__functional_base_03": "cpp",
+        "compare": "cpp",
+        "variant": "cpp"
     }
 }
