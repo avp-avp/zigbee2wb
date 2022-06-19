@@ -226,7 +226,7 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 								}
 								dev->exposes[name] = expose;
 
-								if ((type=="switch" || type=="binary") && iModelTemplate==m_ModelTemplates.end()) {
+								if ((type=="switch" || type=="binary")) {
 									string on  = expose["value_on" ].asString();
 									string off = expose["value_off"].asString();
 									if (on!="" && off!="") {
@@ -235,10 +235,15 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 										m_Converters_z2w[dev][on] = "1";
 										m_Converters_w2z[dev]["0"] = off;
 										m_Converters_z2w[dev][off] = "0";
-										m_ModelTemplates["#"+friendly_name].controls[name].type = CWBControl::Switch;
-										m_ModelTemplates["#"+friendly_name].controls[name].converter_z2w = &m_Converters_z2w[dev];
-										m_ModelTemplates["#"+friendly_name].controls[name].converter_w2z = &m_Converters_w2z[dev];					
-										iModelTemplate = m_ModelTemplates.find("#"+friendly_name);
+										if (iModelTemplate==m_ModelTemplates.end()) {
+											m_ModelTemplates["#"+friendly_name].controls[name].type = CWBControl::Switch;
+											iModelTemplate = m_ModelTemplates.find("#"+friendly_name);
+										}
+										else {
+											iModelTemplate->second.controls[name].type = CWBControl::Switch;
+										}
+										iModelTemplate->second.controls[name].converter_z2w = &m_Converters_z2w[dev];
+										iModelTemplate->second.controls[name].converter_w2z = &m_Converters_w2z[dev];					
 									}
 								}
 
