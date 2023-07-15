@@ -12,6 +12,7 @@ CWBControl::ControlType getWBType(string property_type, string name, int max) {
 	else if (name == "state_left")  return CWBControl::Switch;
 	else if (name == "occupancy")   return CWBControl::Switch;
 	else if (name == "contact")     return CWBControl::Switch;
+	else if (property_type == "enum") return CWBControl::Text;
 	else if (name == "state")       return CWBControl::Switch;
 
 	if (property_type == "numeric") {
