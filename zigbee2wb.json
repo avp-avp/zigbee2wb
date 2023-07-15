@@ -7,58 +7,17 @@
     "base_topic": "zigbee2mqtt"
   },
 
-  "converters": {
-    "on_off": {
-      "ON": "1",
-      "OFF": "0"
-      },
-      "binary": {
-        "true": "1",
-        "false": "0"
-      }
-  },
-
   "models": {
-    "-lumi.sensor_magnet.aq2": {
-      "controls": {
-        "contact": {
-          "type": "switch",
-          "converter": "binary" 
-        }
-      }
-    },
     "lumi.sensor_cube.aqgl01": {
       "json_template" : true
     },
-    "-TI0001          ": {
-      "controls": {
-        "state_right": {
-          "type": "switch",
-          "converter": "on_off" 
-        },
-        "state_left": {
-          "type": "switch",
-          "converter": "on_off" 
-        }
-      }
-    },
     "TS110F": {
       "controls": {
-        "-state": {
-          "type": "switch",
-          "converter": "on_off" 
-        }, 
         "brightness": {
           "type": "range",
           "max": 255
         }
       }
-    }, 
-    "-SWITCH-ZR02\u0000\u0000": {
-      "state": {
-        "type": "switch",
-        "converter": "on_off" 
-      } 
     }
   },
   "debug": {
@@ -66,7 +25,7 @@
       {
         "name": "Main",
         "file_name": "/run/zigbee2wb.log",
-        "console_level": 1,
+        "console_level": 10,
         "file_level": 3,
         "log_time": "yes"
       }

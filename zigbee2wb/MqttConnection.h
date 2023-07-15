@@ -65,4 +65,10 @@ private:
 	void PublishDevice(CWBDevice* dev);
 	void subscribe(const string &topic);
 	void publish(const string &topic, const string &payload, bool retain=false);
+
+	void OnState(const string_vector &topic, const string &payload);
+	void OnLogging(const string_vector &topic, const string &payload);
+	void OnConfig(const string_vector &topic, const string &payload);
+	void OnDevices(const string_vector &topic, const string &payload);
+	void OnDevice(string device, const string &payload);
 };
