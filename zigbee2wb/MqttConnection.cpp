@@ -431,7 +431,8 @@ void CMqttConnection::PublishDevice(CWBDevice* dev)
 	dev->createDeviceValues(v);
 	for_each(string_map, v, i)
 	{
-		publish(i->first, i->second, true);
+		bool retain = !i->first.ends_with("/action");
+		publish(i->first, i->second, retain);
 		m_Log->Printf(5, "publish %s=%s", i->first.c_str(), i->second.c_str());
 	}
 }
