@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/usr
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
+
+override_dh_install:
+	dh_install
+	install -D -m 644 zigbee2wb.service debian/zigbee2wb/lib/systemd/system/zigbee2wb.service
+	install -D -m 644 zigbee2wb.json debian/zigbee2wb/etc/zigbee2wb.conf

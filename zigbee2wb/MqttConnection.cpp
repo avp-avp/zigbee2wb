@@ -1,6 +1,12 @@
 #include "zigbee2wb.h"
 #include "MqttConnection.h"
 
+static bool EndsWith(const std::string& value, const std::string& suffix)
+{
+	return value.size() >= suffix.size() &&
+		   value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 CWBControl::ControlType getWBType(string property_type, string name, int max) {
 	if (name == "temperature")      return CWBControl::Temperature;
 	else if (name == "humidity")    return CWBControl::RelativeHumidity;
@@ -431,7 +437,7 @@ void CMqttConnection::PublishDevice(CWBDevice* dev)
 	dev->createDeviceValues(v);
 	for_each(string_map, v, i)
 	{
-		bool retain = !i->first.ends_with("/action");
+		bool retain = !EndsWith(i->first, "/action");
 		publish(i->first, i->second, retain);
 		m_Log->Printf(5, "publish %s=%s", i->first.c_str(), i->second.c_str());
 	}

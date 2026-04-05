@@ -1,0 +1,26 @@
+Source: zigbee2wb
+Section: utils
+Priority: optional
+Maintainer: Alexey Pavlov <alexey@avp.name>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-autoreconf,
+ autoconf,
+ automake,
+ libtool,
+ libjsoncpp-dev,
+ libmosquitto-dev,
+ libmosquittopp-dev,
+ pkg-config
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/avp-avp/zigbee2wb
+
+Package: zigbee2wb
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: Convert Zigbee2MQTT MQTT notation to Wiren Board notation
+ This service subscribes to Zigbee2MQTT topics and republishes data in a
+ format suitable for Wiren Board integrations.
