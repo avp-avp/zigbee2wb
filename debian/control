@@ -1,7 +1,7 @@
 Source: zigbee2wb
 Section: utils
 Priority: optional
-Maintainer: avlpavlov <avp@avp.name>
+Maintainer: Alexey Pavlov <alexey@avp.name>
 Build-Depends:
  debhelper-compat (= 13),
  dh-autoreconf,
