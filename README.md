@@ -10,6 +10,23 @@ Convert zigbee2mqtt mqtt notation to wirenboard notation
 - ./configure
 - make
 
+## How to build Debian package
+
+- install build dependencies: `sudo apt-get install build-essential debhelper dh-autoreconf autoconf automake libtool libjsoncpp-dev libmosquitto-dev libmosquittopp-dev pkg-config`
+- git submodule init
+- git submodule update
+- dpkg-buildpackage -us -uc -b
+
+The resulting `.deb` package will be created in the parent directory of the repository.
+
+### Build Debian package with `wbdev`
+
+- git submodule init
+- git submodule update
+- ../wbdev ./debian/build-package.sh
+
+The generated artifacts will be copied to the `dist/` directory in the repository.
+
 ## How to build for wirenboard
 
 You need Wirenboard development env from https://github.com/contactless/wirenboard 
