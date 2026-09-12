@@ -1,0 +1,5 @@
+usr/lib/*/libutils.a
+usr/lib/*/libutils.la
+usr/lib/*/libwb.a
+usr/lib/*/libwb.la
+usr/share/doc/zigbee2wb/README.md
