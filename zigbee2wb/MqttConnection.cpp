@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "zigbee2wb.h"
 #include "MqttConnection.h"
 
