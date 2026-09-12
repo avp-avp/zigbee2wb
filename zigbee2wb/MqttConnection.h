@@ -1,6 +1,13 @@
 #pragma once
 #include "zigbee2wb.h"
-#include <mosquitto/libmosquittopp.h>
+
+#if __has_include(<mosquitto/libmosquittopp.h>)
+	#include <mosquitto/libmosquittopp.h>  // Mosquitto 2.1+
+#elif __has_include(<mosquittopp.h>)
+	#include <mosquittopp.h>               // Mosquitto 2.0
+#else
+	#error "Mosquitto C++ development headers are not installed"
+#endif
 
 typedef map<string, string_map> CConverters;
 typedef string (*ConverterFunc)(string);
