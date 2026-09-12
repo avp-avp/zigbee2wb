@@ -11,7 +11,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CHECK_HEADERS([json/json.h])
 AC_CHECK_HEADERS([jsoncpp/json/json.h])
-AM_CONFIG_HEADER(haconfig.inc)
+AC_CONFIG_HEADERS([haconfig.inc])
 
 AC_DEFINE([ZIGBEE2WB],[1],[Convert zigbee2mqtt mqtt notation to wirenboard mqtt devices])
 AC_DEFINE([USE_CONFIG], [1], [Use JSON Config])
