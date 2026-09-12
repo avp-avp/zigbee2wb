@@ -1,6 +1,6 @@
 #pragma once
 #include "zigbee2wb.h"
-#include "mosquittopp.h"
+#include <mosquitto/libmosquittopp.h>
 
 typedef map<string, string_map> CConverters;
 typedef string (*ConverterFunc)(string);
@@ -42,6 +42,7 @@ class CMqttConnection
 	CWBDevice m_ZigbeeWb;
 	CConverters m_Converters_z2w, m_Converters_w2z;
 	CModelTemplateList m_ModelTemplates;
+	string_vector m_ActionFields;
 
 public:
 	CMqttConnection(CConfigItem config, string mqttHost, CLog* log);

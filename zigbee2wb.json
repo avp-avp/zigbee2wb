@@ -1,5 +1,6 @@
 {
   "general": {
+    "action_field": "action"
   },
 
   "mqtt": {

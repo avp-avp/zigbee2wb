@@ -59,6 +59,7 @@ CMqttConnection::CMqttConnection(CConfigItem config, string mqttHost, CLog* log)
 	else m_Server = config.getStr("mqtt/host", false, "wirenboard");
 
 	m_BaseTopic = config.getStr("mqtt/base_topic", false, "zigbee2mqtt");
+	m_ActionFields.push_back(config.getStr("general/action_field", false, "action"));
 	
 	configValues converters;
 	config.getNode("converters").getValues(converters);
@@ -141,10 +142,9 @@ void CMqttConnection::on_disconnect(int rc)
 	m_Log->Printf(1, "mqtt::on_disconnect(%d)", rc);
 }
 
-void Parse(string str, Json::Value &obj){
-	strstream stream;
-	stream<<str;
-	stream>>obj;	
+void Parse(const string& str, Json::Value& obj){
+	stringstream stream(str);
+	stream >> obj;
 }
 
 void CMqttConnection::OnState(const string_vector &topic, const string &payload)
@@ -244,6 +244,16 @@ void CMqttConnection::OnDevices(const string_vector &topic, const string &payloa
 							iModelTemplate->second.controls[name].converter_z2w = &m_Converters_z2w[dev];
 							iModelTemplate->second.controls[name].converter_w2z = &m_Converters_w2z[dev];					
 						}
+					} 
+					else if (type=="enum" && std::find(m_ActionFields.begin(), m_ActionFields.end(), name)
+      										  != m_ActionFields.end()) {
+						string_vector values;
+						Json::Value enumValues = (*iExpose)["values"];
+
+						for (Json::Value::iterator iValue=enumValues.begin();iValue!=enumValues.end();iValue++) {
+							values.push_back(iValue->asString());
+							dev->wbDevice.addControl(iValue->asString(), CWBControl::PushButton, true);
+						}
 					}
 
 					if (expose["access"].asInt()&4) gettableControl = expose["property"].asString();
@@ -330,6 +340,11 @@ void CMqttConnection::OnDevice(string device, const string &payload)
 			value = dev->converters[name](value);
 		}
 		dev->wbDevice.set(name, value);
+
+		if (std::find(m_ActionFields.begin(), m_ActionFields.end(), name) != m_ActionFields.end() && 
+	       dev->wbDevice.getControls()->find(value)!=dev->wbDevice.getControls()->end()) {
+			dev->wbDevice.set(value, "true");	
+		}
 	}
 
 	if (!gotLastSeen) {
@@ -437,8 +452,7 @@ void CMqttConnection::PublishDevice(CWBDevice* dev)
 	dev->createDeviceValues(v);
 	for_each(string_map, v, i)
 	{
-		bool retain = !EndsWith(i->first, "/action");
-		publish(i->first, i->second, retain);
+		publish(i->first, i->second, true);		
 		m_Log->Printf(5, "publish %s=%s", i->first.c_str(), i->second.c_str());
 	}
 }
@@ -457,15 +471,22 @@ void CMqttConnection::SendUpdate()
 
 	for_each(string_map, v, i)
 	{
+		string_vector sv;
+		SplitString(i->first, '/', sv);
+
+		//bool clear = sv[sv.size()-1]=="action";
+		//if (clear) publish(i->first, "-", false);
+		
 		publish(i->first, i->second, true);
-		m_Log->Printf(5, "publish %s=%s", i->first.c_str(), i->second.c_str());
+		m_Log->Printf(5, "publish %s=%s%s", i->first.c_str(), i->second.c_str());
+//		m_Log->Printf(5, "publish %s=%s%s", i->first.c_str(), i->second.c_str(), clear ? " clear=true" : "");
 	}
 }
-
 
 void CMqttConnection::subscribe(const string &topic) {
 	mosqpp::mosquittopp::subscribe(NULL, topic.c_str());
 }
+
 void CMqttConnection::publish(const string &topic, const string &payload, bool retain) {
-	mosqpp::mosquittopp::publish(NULL, topic.c_str(), payload.length(), payload.c_str(), 0, retain);
+	mosqpp::mosquittopp::publish(NULL, topic.c_str(), payload.length(), payload.c_str(), 1, retain);
 }
