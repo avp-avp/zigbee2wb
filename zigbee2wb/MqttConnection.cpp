@@ -277,6 +277,32 @@ void CMqttConnection::OnDevices(const string_vector &topic, const string &payloa
 	}
 }
 
+void CMqttConnection::OnGroups(const string_vector &topic, const string &payload)
+{
+	return;
+	Json::Value groups; Parse(payload, groups);
+	for (Json::Value::iterator iDev=groups.begin();iDev!=groups.end();iDev++) {
+		Json::Value group = *iDev;
+		string friendly_name = group["friendly_name"].asString();
+
+		m_Log->Printf(5, "Group %s", friendly_name.c_str());
+
+		if (m_Devices.find(friendly_name)==m_Devices.end()) {
+			CZigbeeWBDevice *dev = new CZigbeeWBDevice(friendly_name, friendly_name); 
+
+			Json::Value scenes = group["scenes"];
+			for (Json::Value::iterator iScene=scenes.begin();iScene!=scenes.end();iScene++) {
+				dev->wbDevice.addControl((*iScene)["name"].asString(), CWBControl::PushButton, false);
+			}
+			CreateDevice(dev);
+			string topic = "/devices/"+friendly_name+"/controls/+/on";
+			m_Log->Printf(5, "subscribe to %s", topic.c_str());
+			subscribe(topic);
+			// publish(m_BaseTopic+"/"+friendly_name+"/get", "{\""+gettableControl+"\": \"\"}");
+		}
+	}
+}
+
 void CMqttConnection::OnDevice(string device, const string &payload)
 {
 	Json::Value state; Parse(payload, state);
@@ -330,10 +356,10 @@ void CMqttConnection::OnDevice(string device, const string &payload)
 				dev->wbDevice.enrichControl(*i, "max", itoa(value_max));
 
 			if (value_min)
-				dev->wbDevice.enrichControl(*i, "min", itoa(value_max));	
+				dev->wbDevice.enrichControl(*i, "min", itoa(value_min));	
 
 			needCreate = true;
-			m_Log->Printf(5, " Control %s(%s, '%s(%d)'/'%s') access %d", name.c_str(), type.c_str(), property.c_str(), wbType, unit.c_str(), access);
+			m_Log->Printf(5, " Control %s(%s, '%s(%d, %d-%d)'/'%s') access %d", name.c_str(), type.c_str(), property.c_str(), wbType, value_min, value_max, unit.c_str(), access);
 		}
 		if (control_template && control_template->converter_z2w && control_template->converter_z2w->find(value)!=control_template->converter_z2w->end()) {
 			value = (*control_template->converter_z2w)[value];
@@ -354,8 +380,10 @@ void CMqttConnection::OnDevice(string device, const string &payload)
 		milliseconds ms = duration_cast< milliseconds >(
 			system_clock::now().time_since_epoch()
 		);
-		char buf[50]; snprintf(buf, sizeof(buf), "%lld", ms.count());
-		dev->wbDevice.set("lastSeen", buf);
+		if (dev->wbDevice.controlExists("lastSeen")) {
+			char buf[50]; snprintf(buf, sizeof(buf), "%lld", ms.count());
+			dev->wbDevice.set("lastSeen", buf);
+		}
 	}
 
 	if (needCreate) CreateDevice(dev);
@@ -404,6 +432,10 @@ void CMqttConnection::on_message(const struct mosquitto_message *message)
 				else if (v.size()==3 && v[2]=="devices") 
 				{
 					OnDevices(v, payload);
+				} 
+				else if (v.size()==3 && v[2]=="groups") 
+				{
+					OnGroups(v, payload);
 				} 
 			} else if (m_Devices.find(v[1])!=m_Devices.end()) {
 				if (v.size()==2 && message->payloadlen) {

@@ -78,5 +78,6 @@ private:
 	void OnLogging(const string_vector &topic, const string &payload);
 	void OnConfig(const string_vector &topic, const string &payload);
 	void OnDevices(const string_vector &topic, const string &payload);
+	void OnGroups(const string_vector &topic, const string &payload);
 	void OnDevice(string device, const string &payload);
 };
