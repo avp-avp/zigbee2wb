@@ -1,3 +1,10 @@
+zigbee2wb (0.1-3) unstable; urgency=medium
+
+  * Add bridge/groups topic handler (currently disabled stub).
+  * Set lastSeen only when the control exists.
+
+ -- Alexey Pavlov <alexey@avp.name>  Sun, 08 Nov 2026 12:00:00 +0300
+
 zigbee2wb (0.1-2) unstable; urgency=medium
 
   * Initial Debian packaging.
