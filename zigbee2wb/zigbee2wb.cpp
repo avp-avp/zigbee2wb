@@ -1,4 +1,7 @@
 #include "zigbee2wb.h"
+#include "../libs/libutils/Config.h"
+#include "../libs/libutils/thread.h"
+#include "Settings.h"
 #include "MqttConnection.h"
 
 int main(int argc, char* argv[])
@@ -7,18 +10,14 @@ int main(int argc, char* argv[])
 	string configName = "zigbee2wb.json";
 
 	int c;
-	//~ int digit_optind = 0;
-	//~ int aopt = 0, bopt = 0;
-	//~ char *copt = 0, *dopt = 0;
 	while ((c = getopt(argc, argv, "c:m:")) != -1) {
-		//~ int this_option_optind = optind ? optind : 1;
 		switch (c) {
 		case 'c':
 			configName = optarg;
 			break;
 		case 'm':
 			mqttHost = optarg;
-			break;			
+			break;
 		}
 	}
 
@@ -35,13 +34,13 @@ int main(int argc, char* argv[])
 
 		CConfigItem debug = config.getNode("debug");
 		if (debug.isNode())
-		{
 			CLog::Init(&debug);
-		}
 
-		CLog* log = CLog::Default();
+		CSettings settings = CSettings::Load(config.getRoot());
+		if (mqttHost != "")
+			settings.mqttHost = mqttHost;
 
-		CMqttConnection mqttConn(config.getRoot(), mqttHost, log);
+		CMqttConnection mqttConn(settings, CLog::Default());
 
 		while (!mqttConn.isStopped())
 			Sleep(1000);
@@ -53,4 +52,3 @@ int main(int argc, char* argv[])
 	}
 	return 0;
 }
-

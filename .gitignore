@@ -18,3 +18,12 @@ Makefile
 Makefile.in
 .deps
 dist/
+
+# tests
+tests/unit_tests
+tests/*.log
+tests/*.trs
+*.lo
+*.la
+.libs
+test-driver

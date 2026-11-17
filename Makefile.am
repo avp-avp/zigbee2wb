@@ -1,5 +1,5 @@
 AM_CXXFLAGS = -DWB2IH
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = libs/libutils libs/libwb zigbee2wb
+SUBDIRS = libs/libutils libs/libwb zigbee2wb tests
 dist_doc_DATA = README.md

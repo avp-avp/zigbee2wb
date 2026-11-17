@@ -23,5 +23,6 @@ AC_CONFIG_FILES([
  libs/libcomm/Makefile
  libs/libwb/Makefile
  zigbee2wb/Makefile
+ tests/Makefile
 ])
 AC_OUTPUT

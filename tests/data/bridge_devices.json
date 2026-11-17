@@ -1,0 +1,535 @@
+[
+  {
+    "type": "Coordinator",
+    "friendly_name": "Coordinator",
+    "model_id": null,
+    "interview_completed": true,
+    "supported": true
+  },
+  {
+    "type": "EndDevice",
+    "friendly_name": "Z-Switch",
+    "model_id": "lumi.remote.b686opcn01",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "WXCJKG13LM",
+      "vendor": "Aqara",
+      "exposes": [
+        {
+          "access": 1,
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "mV"
+        },
+        {
+          "access": 7,
+          "name": "operation_mode",
+          "property": "operation_mode",
+          "type": "enum",
+          "values": [
+            "command",
+            "event"
+          ]
+        },
+        {
+          "access": 1,
+          "name": "power_outage_count",
+          "property": "power_outage_count",
+          "type": "numeric"
+        },
+        {
+          "access": 1,
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "button_1_hold",
+            "button_1_release",
+            "button_1_single",
+            "button_1_double",
+            "button_1_triple",
+            "button_2_hold",
+            "button_2_release",
+            "button_2_single",
+            "button_2_double",
+            "button_2_triple",
+            "button_3_hold",
+            "button_3_release",
+            "button_3_single",
+            "button_3_double",
+            "button_3_triple",
+            "button_4_hold",
+            "button_4_release",
+            "button_4_single",
+            "button_4_double",
+            "button_4_triple",
+            "button_5_hold",
+            "button_5_release",
+            "button_5_single",
+            "button_5_double",
+            "button_5_triple",
+            "button_6_hold",
+            "button_6_release",
+            "button_6_single",
+            "button_6_double",
+            "button_6_triple"
+          ]
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  },
+  {
+    "type": "EndDevice",
+    "friendly_name": "motion1",
+    "model_id": "lumi.sensor_motion",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "RTCGQ01LM",
+      "vendor": "Xiaomi",
+      "exposes": [
+        {
+          "access": 1,
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "name": "occupancy",
+          "property": "occupancy",
+          "type": "binary",
+          "value_off": false,
+          "value_on": true
+        },
+        {
+          "access": 1,
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "mV"
+        },
+        {
+          "access": 1,
+          "name": "power_outage_count",
+          "property": "power_outage_count",
+          "type": "numeric"
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  },
+  {
+    "type": "EndDevice",
+    "friendly_name": "Outdoor",
+    "model_id": "lumi.weather",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "WSDCGQ11LM",
+      "vendor": "Aqara",
+      "exposes": [
+        {
+          "access": 1,
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "name": "temperature",
+          "property": "temperature",
+          "type": "numeric",
+          "unit": "°C"
+        },
+        {
+          "access": 1,
+          "name": "humidity",
+          "property": "humidity",
+          "type": "numeric",
+          "unit": "%"
+        },
+        {
+          "access": 1,
+          "name": "pressure",
+          "property": "pressure",
+          "type": "numeric",
+          "unit": "hPa"
+        },
+        {
+          "access": 1,
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "mV"
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  },
+  {
+    "type": "Router",
+    "friendly_name": "Socket 1",
+    "model_id": "TS011F",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "A1Z",
+      "vendor": "Nous",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 3,
+          "name": "countdown",
+          "property": "countdown",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 43200,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 7,
+          "name": "power_outage_memory",
+          "property": "power_outage_memory",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "restore"
+          ]
+        },
+        {
+          "access": 7,
+          "name": "switch_type_button",
+          "property": "switch_type_button",
+          "type": "enum",
+          "values": [
+            "release",
+            "press"
+          ]
+        },
+        {
+          "access": 7,
+          "name": "indicator_mode",
+          "property": "indicator_mode",
+          "type": "enum",
+          "values": [
+            "off",
+            "off/on",
+            "on/off",
+            "on"
+          ]
+        },
+        {
+          "access": 1,
+          "name": "power",
+          "property": "power",
+          "type": "numeric",
+          "unit": "W"
+        },
+        {
+          "access": 1,
+          "name": "current",
+          "property": "current",
+          "type": "numeric",
+          "unit": "A"
+        },
+        {
+          "access": 1,
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "V"
+        },
+        {
+          "access": 1,
+          "name": "energy",
+          "property": "energy",
+          "type": "numeric",
+          "unit": "kWh"
+        },
+        {
+          "access": 3,
+          "name": "child_lock",
+          "property": "child_lock",
+          "type": "binary",
+          "value_off": "UNLOCK",
+          "value_on": "LOCK"
+        },
+        {
+          "access": 2,
+          "name": "identify",
+          "property": "identify",
+          "type": "enum",
+          "values": [
+            "identify"
+          ]
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  },
+  {
+    "type": "EndDevice",
+    "friendly_name": "Curtain 1",
+    "model_id": "TS0601",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "AM43-0.45/40-ES-EB",
+      "vendor": "Moes",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 3,
+              "name": "state",
+              "property": "state",
+              "type": "enum",
+              "values": [
+                "OPEN",
+                "CLOSE",
+                "STOP"
+              ]
+            },
+            {
+              "access": 3,
+              "name": "position",
+              "property": "position",
+              "type": "numeric",
+              "unit": "%",
+              "value_max": 100,
+              "value_min": 0
+            }
+          ],
+          "type": "cover"
+        },
+        {
+          "access": 3,
+          "name": "motor_direction",
+          "property": "motor_direction",
+          "type": "enum",
+          "values": [
+            "normal",
+            "reversed"
+          ]
+        },
+        {
+          "access": 3,
+          "name": "motor_speed",
+          "property": "motor_speed",
+          "type": "numeric",
+          "unit": "rpm",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 3,
+          "name": "opening_mode",
+          "property": "opening_mode",
+          "type": "enum",
+          "values": [
+            "tilt",
+            "lift"
+          ]
+        },
+        {
+          "access": 2,
+          "name": "set_upper_limit",
+          "property": "set_upper_limit",
+          "type": "enum",
+          "values": [
+            "SET"
+          ]
+        },
+        {
+          "access": 2,
+          "name": "set_bottom_limit",
+          "property": "set_bottom_limit",
+          "type": "enum",
+          "values": [
+            "SET"
+          ]
+        },
+        {
+          "access": 2,
+          "name": "factory_reset",
+          "property": "factory_reset",
+          "type": "binary",
+          "value_off": false,
+          "value_on": true
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  },
+  {
+    "type": "Router",
+    "friendly_name": "zlStairs",
+    "model_id": "TS0502B",
+    "interview_completed": true,
+    "supported": true,
+    "definition": {
+      "model": "TS0502B",
+      "vendor": "Tuya",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "name": "color_temp",
+              "presets": [
+                {
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "name": "warmest",
+                  "value": 500
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 500,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "name": "do_not_disturb",
+          "property": "do_not_disturb",
+          "type": "binary",
+          "value_off": false,
+          "value_on": true
+        },
+        {
+          "access": 1,
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  }
+]
