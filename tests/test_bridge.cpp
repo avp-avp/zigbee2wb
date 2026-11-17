@@ -75,7 +75,7 @@ TEST_CASE_FIXTURE(CBridgeFixture, "connecting subscribes to zigbee2mqtt and publ
 	CHECK(meta("zigbee", "log", "type") == "text");
 	CHECK(meta("zigbee", "log_level", "type") == "text");
 	CHECK(meta("zigbee", "permit_join", "type") == "switch");
-	CHECK(meta("zigbee", "permit_join", "readonly") == "1");
+	CHECK(meta("zigbee", "permit_join", "readonly") == "0");
 	CHECK(mqtt.find("/devices/zigbee/meta/name")->retain);
 }
 
@@ -374,7 +374,6 @@ TEST_CASE_FIXTURE(CBridgeFixture, "messages for unknown devices are ignored") {
 
 	bridge.onMessage("zigbee2mqtt/stranger", "{\"state\":\"ON\"}");
 	bridge.onMessage("/devices/stranger/controls/state/on", "1");
-	bridge.onMessage("/devices/zigbee/controls/permit_join/on", "1");
 	CHECK(mqtt.published.empty());
 	CHECK(bridge.deviceCount() == 6);
 }
@@ -435,6 +434,33 @@ TEST_CASE_FIXTURE(CBridgeFixture, "bridge info is shown in the zigbee device") {
 	bridge.onMessage("zigbee2mqtt/bridge/info", "{\"log_level\":\"debug\",\"permit_join\":false}");
 	CHECK(control("zigbee", "log_level") == "debug");
 	CHECK(control("zigbee", "permit_join") == "0");
+}
+
+TEST_CASE("permit_join sends a timed request and waits for bridge info") {
+	CBridgeFixture f("{\"mqtt\":{\"base_topic\":\"z2m\"}}");
+	const string command = "/devices/zigbee/controls/permit_join/on";
+	const string request = "z2m/bridge/request/permit_join";
+
+	f.bridge.onMessage(command, "1", true);
+	f.bridge.onMessage(command, "invalid");
+	CHECK(f.mqtt.published.empty());
+
+	f.bridge.onMessage(command, "1");
+	REQUIRE(f.mqtt.published.size() == 1);
+	CHECK(f.mqtt.payload(request) == "{\"time\":254}");
+	CHECK_FALSE(f.mqtt.published[0].retain);
+
+	f.bridge.onMessage("z2m/bridge/info", "{\"permit_join\":true}");
+	CHECK(f.control("zigbee", "permit_join") == "1");
+
+	f.mqtt.clear();
+	f.bridge.onMessage(command, "0");
+	REQUIRE(f.mqtt.published.size() == 1);
+	CHECK(f.mqtt.payload(request) == "{\"time\":0}");
+	CHECK_FALSE(f.mqtt.published[0].retain);
+
+	f.bridge.onMessage("z2m/bridge/info", "{\"permit_join\":false}");
+	CHECK(f.control("zigbee", "permit_join") == "0");
 }
 
 TEST_CASE("the configured base topic is used everywhere") {

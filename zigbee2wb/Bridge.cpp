@@ -20,7 +20,7 @@ CBridge::CBridge(const CSettings &settings, IMqttTransport *transport, CLog *log
 {
 	m_BridgeDevice.addControl("state", CWBControl::Text, true);
 	m_BridgeDevice.addControl("log_level", CWBControl::Text, true);
-	m_BridgeDevice.addControl("permit_join", CWBControl::Switch, true);
+	m_BridgeDevice.addControl("permit_join", CWBControl::Switch, false);
 	m_BridgeDevice.addControl("log", CWBControl::Text, true);
 	m_BridgeDevice.addControl(REFRESH, CWBControl::PushButton, false);
 }
@@ -100,7 +100,7 @@ void CBridge::dispatch(const string &topic, const string &payload, bool retained
 	case CTopic::BridgeInfo:     onBridgeInfo(payload); break;
 	case CTopic::BridgeDevices:  onBridgeDevices(payload); break;
 	case CTopic::DeviceState:    onDeviceState(parsed.device, payload); break;
-	case CTopic::ControlCommand: onControlCommand(parsed.device, parsed.control, payload); break;
+	case CTopic::ControlCommand: onControlCommand(parsed.device, parsed.control, payload, retained); break;
 	case CTopic::DeviceDriver:
 	case CTopic::DeviceMeta:     trackDriver(parsed, payload); break;
 	case CTopic::BridgeGroups:   // groups are not supported
@@ -201,11 +201,15 @@ void CBridge::onDeviceState(const string &name, const string &payload)
 	publishChanges();
 }
 
-void CBridge::onControlCommand(const string &wbDevice, const string &control, const string &payload)
+void CBridge::onControlCommand(const string &wbDevice, const string &control, const string &payload, bool retained)
 {
 	if (wbDevice == m_BridgeDevice.id()) {
 		if (control == REFRESH)
 			refresh();
+		else if (control == "permit_join" && !retained && (payload == "0" || payload == "1")) {
+			m_Transport->publish(m_Settings.baseTopic + "/bridge/request/permit_join",
+				payload == "1" ? "{\"time\":254}" : "{\"time\":0}", false);
+		}
 		return;
 	}
 

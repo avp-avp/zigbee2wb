@@ -1,6 +1,8 @@
 #include "TestHelpers.h"
 #include "../zigbee2wb/Exposes.h"
 
+#include <climits>
+
 static CExposeMap Parse(const string &json)
 {
 	CExposeMap result;
