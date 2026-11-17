@@ -1,5 +1,7 @@
 #include "TestHelpers.h"
 
+#include <climits>
+
 TEST_SUITE("JsonUtils") {
 
 TEST_CASE("ParseJson parses a document") {
