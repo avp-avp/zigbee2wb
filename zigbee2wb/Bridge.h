@@ -80,7 +80,7 @@ private:
 	void onBridgeInfo(const string &payload);
 	void onBridgeDevices(const string &payload);
 	void onDeviceState(const string &device, const string &payload);
-	void onControlCommand(const string &wbDevice, const string &control, const string &payload);
+	void onControlCommand(const string &wbDevice, const string &control, const string &payload, bool retained);
 
 	static bool isReady(const Json::Value &info);
 	void addDevice(const Json::Value &info);

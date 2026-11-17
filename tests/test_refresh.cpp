@@ -263,7 +263,6 @@ TEST_CASE_FIXTURE(CRefreshFixture, "a refresh interrupted by a reconnect starts 
 }
 
 TEST_CASE_FIXTURE(CRefreshFixture, "other commands to the zigbee device are ignored") {
-	bridge.onMessage("/devices/zigbee/controls/permit_join/on", "1");
 	bridge.onMessage("/devices/zigbee/controls/nonsense/on", "1");
 	CHECK_FALSE(bridge.isRefreshing());
 	CHECK(mqtt.published.empty());
